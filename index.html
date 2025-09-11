@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Викторина (без 3D) — мобильная</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <style>
     :root{
@@ -30,16 +31,16 @@
     .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,116,222,0.12)}
     .small{font-size:.88rem;color:var(--muted)}
     @media (max-width:420px){ .question{font-size:1rem} }
-    /* placeholder for AR panel */
-    .ar-placeholder{height:260px;border-radius:10px;background:linear-gradient(180deg,#f0f4ff,#fff);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:18px;text-align:center}
-    .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .chip{background:#f3f6fb;padding:8px 10px;border-radius:999px;font-weight:600;color:var(--muted)}
+    
+     /* 💜 AR / 3D панель */
+    .ar-panel{margin-top:12px}
+    model-viewer{width:100%;height:300px;border-radius:12px;}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>Викторина — подготовка к AR</h1>
+      <h1>Викторина — AR/3D</h1>
       <div class="progress" id="progress">Блок 1 / 6</div>
     </header>
 
@@ -55,19 +56,18 @@
       </div>
     </div>
 
-    <!-- AR / 3D placeholder panel (без моделей пока) -->
-    <div id="ar-panel" class="card hidden" style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div>
-          <strong id="ar-title">Панель после блока</strong>
-          <div class="small">Здесь позже будет 3D/AR сцена. Пока — заглушка.</div>
-        </div>
-        <div><button id="continue-btn" class="btn">Продолжить</button></div>
-      </div>
-
-      <div class="ar-placeholder">
-        <div style="font-weight:700;margin-bottom:6px" id="ar-msg">Поздравляем! Блок завершён.</div>
-        <div class="small">Когда добавишь модели — заменить этот блок на &lt;model-viewer&gt; и положить файлы в models/</div>
+    <!-- 💜 AR / 3D панель -->
+    <div id="ar-panel" class="card hidden ar-panel">
+      <!-- 💜 model-viewer, src подставляется динамически -->
+      <model-viewer id="model-viewer"
+        src="" <!-- 💜 путь к модели блока будет подставлен JS -->
+        alt="3D модель блока"
+        ar
+        auto-rotate
+        camera-controls
+      ></model-viewer>
+      <div style="margin-top:10px;text-align:center">
+        <button id="continue-btn" class="btn">Продолжить</button>
       </div>
     </div>
 
@@ -140,7 +140,7 @@ const optionsEl = document.getElementById('options');
 const progress = document.getElementById('progress');
 const quiz = document.getElementById('quiz');
 const arPanel = document.getElementById('ar-panel');
-const arTitle = document.getElementById('ar-title');
+const modelViewer = document.getElementById('model-viewer');
 const arMsg = document.getElementById('ar-msg');
 const continueBtn = document.getElementById('continue-btn');
 const final = document.getElementById('final');

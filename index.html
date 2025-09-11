@@ -209,6 +209,7 @@ function showARForBlock(blockIndex){
   const b = blocks[blockIndex];
   arTitle.textContent = `Блок ${blockIndex+1} — ${b.title}`;
   arMsg.textContent = `Блок ${blockIndex+1} завершён. Правильных ответов в блоке: ${blockCorrect}. Нажми "Продолжить" чтобы перейти дальше.`;
+  modelViewer.src = b.model;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 

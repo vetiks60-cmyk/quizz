@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Мобильная викторина с AR / 3D</title>
+
+  <!-- model-viewer (Google) -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    :root{--bg:#f5f7fb;--card:#ffffff;--accent:#0b74de;--ok:#2e7d32;--bad:#c62828;--muted:#6b7280}
+    body{background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;margin:0;color:#111}
+    .wrap{max-width:760px;margin:0 auto;padding:18px}
+    header{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+    h1{font-size:1.15rem;margin:0}
+    .progress{margin-left:auto;color:var(--muted);font-size:.95rem}
+    .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(17,24,39,0.06)}
+    .question-number{font-size:.9rem;color:var(--muted);margin-bottom:6px}
+    .question{font-weight:600;font-size:1.05rem;margin-bottom:12px}
+    .options{display:grid;gap:8px}
+    .option{padding:12px;border-radius:10px;border:1px solid #e6eef8;background:#fff;text-align:left;cursor:pointer;font-size:.98rem}
+    .option:active{transform:translateY(1px)}
+    .option.correct{background:#c8e6c9;border-color:var(--ok);color: #0b3f18}
+    .option.wrong{background:#ffdede;border-color:var(--bad);color:#5b1212}
+    .hidden{display:none}
+    .center{display:flex;gap:8px;align-items:center;justify-content:center}
+    footer{margin-top:14px;color:var(--muted);font-size:.9rem;text-align:center}
+    /* AR panel */
+    #ar-panel{margin-top:12px}
+    model-viewer{width:100%;height:350px;border-radius:10px;background:linear-gradient(180deg,#f0f4ff,#fff)}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,116,222,0.12)}
+    @media (max-width:420px){ model-viewer{height:300px} .question{font-size:1rem} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Викторина — 3D & AR</h1>
+      <div class="progress" id="progress">Блок 1 / 6</div>
+    </header>
+
+    <div id="quiz" class="card">
+      <div class="question-number" id="q-info">Вопрос 1 из 4</div>
+      <div class="question" id="q-text">Загрузка...</div>
+      <div class="options" id="options"></div>
+    </div>
+
+    <div id="ar-panel" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div><strong id="ar-title">Модель блока 1</strong><div style="font-size:.85rem;color:var(--muted)">Посмотри в 3D или включи AR</div></div>
+        <div><button id="continue-btn" class="btn">Продолжить</button></div>
+      </div>
+
+      <!-- Здесь указываем путь к .glb в repo, например models/block1.glb -->
+      <model-viewer id="mv" src="models/block1.glb" ios-src="" alt="3D модель"
+        ar ar-modes="webxr scene-viewer quick-look" camera-controls auto-rotate
+        style="width:100%;height:340px;"></model-viewer>
+      <div style="margin-top:8px;color:var(--muted);font-size:.9rem">
+        Примечание: на Android используйте Scene Viewer / WebXR; на iOS Quick Look (USDZ будет сгенерирован автоматически, если не указано ios-src). 
+      </div>
+    </div>
+
+    <footer id="final" class="hidden">
+      <div class="card center" style="flex-direction:column;gap:10px;padding:18px">
+        <div id="final-text" style="font-weight:700">Поздравляем — викторина завершена!</div>
+        <div style="font-size:.95rem;color:var(--muted)">Если нужно — можно перезапустить или открыть другие блоки.</div>
+        <div style="display:flex;gap:8px">
+          <button id="restart" class="btn">Перезапустить</button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+<script>
+/*
+  Данные: блоки -> вопросы
+  Для каждой модели положи файл в /models/block1.glb, block2.glb, ..., block6.glb
+  Измени тексты вопросов/вариантов в массиве ниже.
+*/
+const blocks = [
+  {
+    title: 'Блок 1',
+    model: 'models/block1.glb',
+    questions: [
+      {q:'Столица Франции?', options:['Барселона','Париж','Рим','Берлин'], answer:1},
+      {q:'2+2 = ?', options:['3','4','5','6'], answer:1},
+      {q:'Какой цвет получается при смешении синего и желтого?', options:['Фиолетовый','Зелёный','Оранжевый','Чёрный'], answer:1},
+      {q:'Какая планета ближе всего к Солнцу?', options:['Земля','Марс','Меркурий','Венера'], answer:2}
+    ]
+  },
+  { title:'Блок 2', model:'models/block2.glb', questions:[
+      {q:'Сколько часов в сутках?', options:['20','24','22','26'], answer:1},
+      {q:'Какой газ необходим для дыхания?', options:['Кислород','Азот','Водород','Углекислый газ'], answer:0},
+      {q:'Какой год високосный?', options:['2023','2024','2025','2026'], answer:1},
+      {q:'Сколько сторон у квадрата?', options:['3','4','5','6'], answer:1}
+  ]},
+  { title:'Блок 3', model:'models/block3.glb', questions:[
+      {q:'HTML — это?', options:['Язык стилей','Язык разметки','Язык программирования','База данных'], answer:1},
+      {q:'CSS управляет?', options:['Структурой','Данными','Стилем','Сервером'], answer:2},
+      {q:'JS расшифровывается как?', options:['JavaScript','JustScript','JorgeScript','JointScript'], answer:0},
+      {q:'Что делает model-viewer?', options:['Отправляет почту','Отображает 3D','Запускает сервер','Редактирует видео'], answer:1}
+  ]},
+  { title:'Блок 4', model:'models/block4.glb', questions:[
+      {q:'Какой океан самый большой?', options:['Атлантический','Индийский','Тихий','Северный Ледовитый'], answer:2},
+      {q:'Сколько континентов на Земле?', options:['5','6','7','8'], answer:2},
+      {q:'Какая часть растения отвечает за фотосинтез?', options:['Корень','Стебель','Лист','Цветок'], answer:2},
+      {q:'Самая высокая гора?', options:['К2','Эверест','Мак-Кинли','Килиманджаро'], answer:1}
+  ]},
+  { title:'Блок 5', model:'models/block5.glb', questions:[
+      {q:'HTML элемент для заголовка?', options:['<p>','<h1>','<div>','<span>'], answer:1},
+      {q:'Какой тег для ссылок?', options:['<a>','<link>','<href>','<url>'], answer:0},
+      {q:'Какой атрибут у model-viewer отвечает за AR?', options:['ar','xr','vr','mode'], answer:0},
+      {q:'Что такое GLB?', options:['Текстовый формат','Бинарный glTF','Изображение','Аудиофайл'], answer:1}
+  ]},
+  { title:'Блок 6', model:'models/block6.glb', questions:[
+      {q:'Что такое GitHub Pages?', options:['СУБД','Хостинг статических сайтов','IDE','Язык программирования'], answer:1},
+      {q:'Расширение для 3D модели glTF?', options:['.png','.glb','.mp3','.pdf'], answer:1},
+      {q:'Какой метод показывает следующий вопрос в этом коде?', options:['renderQuestion','next','show','display'], answer:0},
+      {q:'Последний вопрос — тест завершён?', options:['Да','Нет','Может быть','Еще нет'], answer:0}
+  ]}
+];
+
+// состояние
+let currentBlock = 0;
+let currentQuestion = 0;
+let answered = false;
+
+const qInfo = document.getElementById('q-info');
+const qText = document.getElementById('q-text');
+const optionsEl = document.getElementById('options');
+const progress = document.getElementById('progress');
+const quiz = document.getElementById('quiz');
+const arPanel = document.getElementById('ar-panel');
+const arTitle = document.getElementById('ar-title');
+const mv = document.getElementById('mv');
+const continueBtn = document.getElementById('continue-btn');
+const final = document.getElementById('final');
+const restart = document.getElementById('restart');
+
+function renderQuestion(){
+  const block = blocks[currentBlock];
+  const q = block.questions[currentQuestion];
+  progress.textContent = `Блок ${currentBlock+1} / ${blocks.length}`;
+  qInfo.textContent = `Вопрос ${currentQuestion+1} из ${block.questions.length}`;
+  qText.textContent = q.q;
+  optionsEl.innerHTML = '';
+  q.options.forEach((opt, idx)=>{
+    const b = document.createElement('button');
+    b.className = 'option';
+    b.type = 'button';
+    b.textContent = opt;
+    b.addEventListener('click', ()=>selectOption(idx, b));
+    optionsEl.appendChild(b);
+  });
+}
+
+function selectOption(idx, btn){
+  if(answered) return;
+  answered = true;
+  const block = blocks[currentBlock];
+  const q = block.questions[currentQuestion];
+  // подсветить правильный
+  const children = Array.from(optionsEl.children);
+  children.forEach((el, i)=>{
+    if(i === q.answer) el.classList.add('correct');
+    if(i === idx && i !== q.answer) el.classList.add('wrong');
+    // блокируем кнопки
+    el.disabled = true;
+  });
+
+  // через короткую паузу — следующий вопрос или AR
+  setTimeout(()=>{
+    if(currentQuestion < block.questions.length - 1){
+      currentQuestion++;
+      answered = false;
+      renderQuestion();
+      window.scrollTo({top:0,behavior:'smooth'});
+    } else {
+      // конец блока — показать AR / 3D модель
+      showARForBlock(currentBlock);
+    }
+  }, 700);
+}
+
+function showARForBlock(blockIndex){
+  quiz.classList.add('hidden');
+  arPanel.classList.remove('hidden');
+  const b = blocks[blockIndex];
+  arTitle.textContent = `Модель — ${b.title}`;
+  mv.src = b.model;
+  // ios-src можно добавить если у тебя готовый .usdz. model-viewer может автогенерировать USDZ для Quick Look.
+  // скроллим к панели
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+continueBtn.addEventListener('click', ()=>{
+  arPanel.classList.add('hidden');
+  currentBlock++;
+  if(currentBlock >= blocks.length){
+    showFinal();
+  } else {
+    currentQuestion = 0;
+    quiz.classList.remove('hidden');
+    renderQuestion();
+  }
+});
+
+function showFinal(){
+  quiz.classList.add('hidden');
+  arPanel.classList.add('hidden');
+  final.classList.remove('hidden');
+  document.getElementById('final-text').textContent = 'Викторина завершена — спасибо!';
+}
+
+restart.addEventListener('click', ()=>{
+  currentBlock = 0; currentQuestion = 0; answered = false;
+  final.classList.add('hidden');
+  quiz.classList.remove('hidden');
+  renderQuestion();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+// старт
+renderQuestion();
+</script>
+</body>
+</html>

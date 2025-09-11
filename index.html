@@ -56,20 +56,28 @@
       </div>
     </div>
 
-    <!-- 💜 AR / 3D панель -->
-    <div id="ar-panel" class="card hidden ar-panel">
-      <!-- 💜 model-viewer, src подставляется динамически -->
-      <model-viewer id="model-viewer"
-        src="" <!-- 💜 путь к модели блока будет подставлен JS -->
-        alt="3D модель блока"
-        ar
-        auto-rotate
-        camera-controls
-      ></model-viewer>
-      <div style="margin-top:10px;text-align:center">
-        <button id="continue-btn" class="btn">Продолжить</button>
-      </div>
-    </div>
+   <!-- 💜 AR / 3D панель -->
+<div id="ar-panel" class="card hidden ar-panel">
+  <!-- заголовок блока -->
+  <h2 id="ar-title" style="margin:0 0 8px 0;font-size:1rem;text-align:center"></h2>
+
+  <!-- 3D модель -->
+  <model-viewer id="model-viewer"
+    src=""
+    alt="3D модель блока"
+    ar
+    auto-rotate
+    camera-controls
+  ></model-viewer>
+
+  <!-- сообщение -->
+  <div id="ar-msg" style="margin-top:10px;text-align:center;font-size:.9rem;color:#444"></div>
+
+  <div style="margin-top:10px;text-align:center">
+    <button id="continue-btn" class="btn">Продолжить</button>
+  </div>
+</div>
+
 
     <!-- Final screen -->
     <footer id="final" class="hidden">
